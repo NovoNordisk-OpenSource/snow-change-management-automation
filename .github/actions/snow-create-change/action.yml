@@ -131,7 +131,6 @@ runs:
           "requested_by": "WKRZ",
           "impact": "2",
           "urgency": "3",
-          "risk_impact_analysis": "Impact analysis",
           "backout_plan": "Backout plan",
           "test_plan": "Lorem ipsum dolor sit amet",
           "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
