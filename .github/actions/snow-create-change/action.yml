@@ -105,7 +105,8 @@ runs:
         # Debug template ID
         echo "Template ID from input: '$TEMPLATE_ID'"
         TEMPLATE_ID=$(echo "$TEMPLATE_ID" | tr -d '[:space:]')  # Remove any whitespace
-        echo "Template ID after cleanup: '$TEMPLATE_ID'"
+        echo "Template ID after cleanup: '${TEMPLATE_ID:0:4}...${TEMPLATE_ID: -4}' (first 4 and last 4 chars)"
+        echo "Full template ID: $TEMPLATE_ID"
         if [ -z "$TEMPLATE_ID" ]; then
           echo "❌ Error: TEMPLATE_ID is empty"
         fi
