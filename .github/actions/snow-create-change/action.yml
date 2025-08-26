@@ -101,9 +101,15 @@ runs:
         export TZ=UTC
         START_DATE=$(date -v+1d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow" +"%Y-%m-%d 00:00:00")
         END_DATE=$(date -v+2d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow + 1 day" +"%Y-%m-%d 00:00:00")
-        echo AAA
-        echo $TEMPLATE_ID 
-        echo BBBB
+        
+        # Debug template ID
+        echo "Template ID from input: '$TEMPLATE_ID'"
+        TEMPLATE_ID=$(echo "$TEMPLATE_ID" | tr -d '[:space:]')  # Remove any whitespace
+        echo "Template ID after cleanup: '$TEMPLATE_ID'"
+        if [ -z "$TEMPLATE_ID" ]; then
+          echo "❌ Error: TEMPLATE_ID is empty"
+          exit 1
+        fi
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
