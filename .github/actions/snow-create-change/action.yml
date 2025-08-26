@@ -127,16 +127,6 @@ runs:
           exit 1
         fi
         
-        # Get the first available service offering ID
-        SERVICE_OFFERING_ID=$(echo "$SERVICE_OFFERINGS_RESPONSE" | jq -r '.result[0].sys_id' 2>/dev/null)
-        
-        if [ -z "$SERVICE_OFFERING_ID" ] || [ "$SERVICE_OFFERING_ID" = "null" ]; then
-          echo "❌ Error: No valid service offerings found"
-          exit 1
-        fi
-        
-        echo "Using service offering ID: $SERVICE_OFFERING_ID"
-        
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
@@ -144,9 +134,9 @@ runs:
           -H "Accept: application/json" \
           -d @- "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/0bfe466b2b662250f026f6bcf291bfbe" <<EOF
         {
-          "u_service_offering": "$SERVICE_OFFERING_ID",
-          "start_date": "$START_DATE",
-          "end_date": "$END_DATE",
+          "u_service_offering": "AAA",
+          "start_date": "2025-10-12 00:00:00",
+          "end_date": "2025-10-13 00:00:00",
           "work_start": "2025-10-15 00:00:00",
           "work_end": "2025-10-19 00:00:00",
           "risk": "1",
