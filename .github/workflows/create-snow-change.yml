@@ -28,6 +28,7 @@ jobs:
           password: ${{ secrets.SN_PASSWORD }}
           client_id: ${{ secrets.CLIENT_ID }}
           client_secret: ${{ secrets.CLIENT_SECRET }}
+          template_id: ${{ secrets.TEMPLATE_ID }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         

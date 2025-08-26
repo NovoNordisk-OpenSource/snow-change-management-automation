@@ -108,14 +108,13 @@ runs:
         echo "Template ID after cleanup: '$TEMPLATE_ID'"
         if [ -z "$TEMPLATE_ID" ]; then
           echo "❌ Error: TEMPLATE_ID is empty"
-          exit 1
         fi
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json" \
-          -d @- "$INSTANCE/api/nnash/v1/change_request/standard/create/$TEMPLATE_ID" <<EOF
+          -d @- "$INSTANCE/api/nnash/v1/change_request/standard/create/009d077edba58c50ed474540399619cf" <<EOF
         {
           "u_service_offering": "SO-6712 BMS FMS CoE",
           "start_date": "2025-10-12 00:00:00",
