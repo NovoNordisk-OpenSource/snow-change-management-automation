@@ -119,7 +119,7 @@ runs:
           -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json" \
-          -d @- "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/D0bfe466b2b662250f026f6bcf291bfbe" <<EOF
+          -d @- "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/0bfe466b2b662250f026f6bcf291bfbe" <<EOF
         {
           "u_service_offering": "SO-6712 BMS FMS CoE",
           "start_date": "2025-10-12 00:00:00",
