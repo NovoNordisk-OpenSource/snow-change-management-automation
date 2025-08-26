@@ -131,7 +131,6 @@ runs:
           "requested_by": "WKRZ",
           "impact": "2",
           "urgency": "3",
-          "test_plan": "Lorem ipsum dolor sit amet",
           "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
           "u_sarbox": "yes",
           "u_criticality": "other_regulatory",
