@@ -114,6 +114,7 @@ runs:
         echo AAA
         echo $INSTANCE
         echo BBB
+        echo "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/0bfe466b2b662250f026f6bcf291bfbe"
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
