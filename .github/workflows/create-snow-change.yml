@@ -1,83 +1,44 @@
-name: Create ServiceNow Standard Change
+name: Create ServiceNow Change
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/actions/snow-create-change/**'
+      - '.github/workflows/create-snow-change.yml'
   workflow_dispatch:
     inputs:
       description:
         description: 'Change description'
         required: true
-        default: 'Automated standard change created from GitHub Actions'
+        default: 'Automated change created from GitHub Actions'
 
 jobs:
-  create-standard-change:
+  create-change:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Create ServiceNow Change
         id: create_change
+        uses: ./.github/actions/snow-create-change
+        with:
+          username: ${{ secrets.SN_USERNAME }}
+          password: ${{ secrets.SN_PASSWORD }}
+          client_id: ${{ secrets.CLIENT_ID }}
+          client_secret: ${{ secrets.CLIENT_SECRET }}
         env:
-          INSTANCE: 'novonordisktraining.service-now.com'
-          USERNAME: ${{ secrets.SNOW_USERNAME }}
-          PASSWORD: ${{ secrets.SNOW_PASSWORD }}
-          TEMPLATE_ID: 'standard-template-123'  # Replace with your template ID
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Display Access Token
+        if: steps.create_change.outputs.access_token
         run: |
-          # Set default values
-          DESCRIPTION="${{ github.event.inputs.description }}"
+          echo "Access token obtained successfully"
+          echo "Token: ${{ steps.create_change.outputs.access_token }}"
           
-          # Create the change request
-          echo "Creating standard change request..."
-          RESPONSE=$(curl -sS \
-            -u "$USERNAME:$PASSWORD" \
-            -X POST \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
-            -d '{
-              "u_service_offering": "SO-6712 BMS FMS CoE",
-              "start_date": "2025-10-12 00:00:00",
-              "end_date": "2025-10-13 00:00:00",
-              "work_start": "2025-10-15 00:00:00",
-              "work_end": "2025-10-19 00:00:00",
-              "risk": "1",
-              "requested_by": "WKRZ",
-              "impact": "2",
-              "urgency": "3",
-              "implementation_plan": "Automated implementation plan for the change",
-              "risk_impact_analysis": "Risk impact analysis for the change",
-              "backout_plan": "Backout plan in case of failure",
-              "test_plan": "Test plan for the change",
-              "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
-              "u_sarbox": "yes",
-              "u_criticality": "other_regulatory",
-              "parent": "INC4215160",
-              "u_release": "1dff7bc73b8e96d4cbad6d6eb5e45a80",
-              "u_service_request": "RITM0781791",
-              "u_integration_task": "INTG0634241",
-              "u_change_manager": "WKRZ",
-              "assigned_to": "WKRZ",
-              "description": "'"$DESCRIPTION"'"
-            }' \
-            "https://$INSTANCE/api/nnash/v1/change_request/standard/create/$TEMPLATE_ID")
-          
-          # Check for errors
-          if ! echo "$RESPONSE" | jq -e '.result' > /dev/null; then
-            echo "Error creating change:"
-            echo "$RESPONSE" | jq .
-            exit 1
-          fi
-          
-          # Extract and output results
-          CHANGE_NUMBER=$(echo "$RESPONSE" | jq -r '.result.number')
-          SYS_ID=$(echo "$RESPONSE" | jq -r '.result.sys_id')
-          LINK="https://$INSTANCE/nav_to.do?uri=change_request.do?sys_id=$SYS_ID"
-          
-          echo "✅ Change $CHANGE_NUMBER created successfully!"
-          echo "🔗 View change: $LINK"
-          
-          # Set outputs
-          echo "change_number=$CHANGE_NUMBER" >> $GITHUB_OUTPUT
-          echo "sys_id=$SYS_ID" >> $GITHUB_OUTPUT
-          echo "link=$LINK" >> $GITHUB_OUTPUT
-    
-      - name: Display Change Details
+      - name: Handle Failure
+        if: failure()
         run: |
-          echo "Change Number: ${{ steps.create_change.outputs.change_number }}"
-          echo "Change Link: ${{ steps.create_change.outputs.link }}"
+          echo "Action failed. Check the logs above for details."
+          exit 1

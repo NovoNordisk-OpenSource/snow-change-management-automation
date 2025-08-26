@@ -1,0 +1,27 @@
+name: Create ServiceNow Change
+
+on:
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Change description'
+        required: true
+        default: 'Automated change created from GitHub Actions'
+
+jobs:
+  create-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create ServiceNow Change
+        id: create_change
+        uses: ./.github/actions/snow-create-change
+
+      - name: Display Change Details
+        run: |
+          echo "Change created successfully!"
+          echo "Change Number: ${{ steps.create_change.outputs.change_number }}"
+          echo "Sys ID: ${{ steps.create_change.outputs.sys_id }}"
+          echo "Link: ${{ steps.create_change.outputs.link }}"

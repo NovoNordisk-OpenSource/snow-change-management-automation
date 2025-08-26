@@ -1,23 +1,19 @@
-name: 'ServiceNow Create Standard Change'
-description: 'Create a standard IT change in ServiceNow using the nnash API'
+name: 'ServiceNow Create Change'
+description: 'Create a standard IT change in ServiceNow using the nnash API with GitHub Secrets'
 
 inputs:
-  instance:
-    description: 'ServiceNow instance URL (e.g., novonordisktraining.service-now.com)'
-    required: true
   username:
     description: 'ServiceNow username'
     required: true
   password:
-    description: 'ServiceNow password or API token'
+    description: 'ServiceNow password'
     required: true
-  template_id:
-    description: 'Template ID for the standard change'
+  client_id:
+    description: 'OAuth client ID'
     required: true
-  description:
-    description: 'Change description'
+  client_secret:
+    description: 'OAuth client secret'
     required: true
-    default: 'Automated change created from GitHub Actions'
 
 runs:
   using: 'composite'
@@ -26,45 +22,116 @@ runs:
       shell: bash
       run: |
         # Set variables
-        INSTANCE="${{ inputs.instance }}"
-        USERNAME="Trunque-API"
-        PASSWORD="wfasdfasd"
-        DESCRIPTION="Test description"
+        INSTANCE="https://novonordisktraining.service-now.com"
+        
+        # Debug: Show all environment variables
+        echo "Environment variables:"
+        echo "AAA"
+        # Get credentials from inputs
+        USERNAME="${{ inputs.username }}"
+        PASSWORD="${{ inputs.password }}"
+        CLIENT_ID="${{ inputs.client_id }}"
+        CLIENT_SECRET="${{ inputs.client_secret }}"
+        
+        # Show values with first/last characters of sensitive values
+        echo "\nValues being used:"
+        echo "USERNAME: ${USERNAME:0:2}***** (${#USERNAME} chars)"
+        if [ ${#PASSWORD} -gt 0 ]; then
+          echo "PASSWORD: ${PASSWORD:0:1}*****${PASSWORD: -1} (${#PASSWORD} chars)"
+        else
+          echo "PASSWORD: (empty)"
+        fi
+        echo "CLIENT_ID: ${CLIENT_ID:0:4}***** (${#CLIENT_ID} chars)"
+        if [ ${#CLIENT_SECRET} -gt 0 ]; then
+          echo "CLIENT_SECRET: ${CLIENT_SECRET:0:1}*****${CLIENT_SECRET: -1} (${#CLIENT_SECRET} chars)"
+        else
+          echo "CLIENT_SECRET: (empty)"
+        fi
+        echo "INSTANCE: $INSTANCE"
+        # Get OAuth 2.0 token using password grant
+        echo "Getting OAuth 2.0 token..."
+        # URL encode the password and client secret
+        ENCODED_PASSWORD=$(echo -n "$PASSWORD" | jq -sRr @uri)
+        ENCODED_CLIENT_SECRET=$(echo -n "$CLIENT_SECRET" | jq -sRr @uri)
+        
+        # Debug: Show encoded values
+        echo "Encoded Password: $ENCODED_PASSWORD"
+        echo "Encoded Client Secret: $ENCODED_CLIENT_SECRET"
+        
+        # Make the request with encoded values
+        echo "Making request to: $INSTANCE/oauth_token.do"
+        echo "Client ID: ${CLIENT_ID:0:4}*****"
+        echo "Username: $USERNAME"
+        
+        # Using working curl command with response capture
+        echo "Sending request to get access token..."
+        TOKEN_RESPONSE=$(curl -sS -X POST \
+          "https://novonordisktraining.service-now.com/oauth_token.do" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=password" \
+          -d "client_id=$CLIENT_ID" \
+          -d "client_secret=$ENCODED_CLIENT_SECRET" \
+          -d "username=$USERNAME" \
+          -d "password=$ENCODED_PASSWORD")
 
+        # Debug: Show the raw response
+        echo "Raw token response:"
+        echo "$TOKEN_RESPONSE"
+        
+        # Extract and display the access token
+        if ! ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token' 2>/dev/null) || [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+          echo "❌ Failed to get access token. Response was:"
+          echo "$TOKEN_RESPONSE"
+          exit 1
+        fi
+        
+        echo "✅ Successfully obtained access token"
+        echo "Access token: ${ACCESS_TOKEN:0:10}..."
+        
+        # Set the access token as an output
+        echo "access_token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+        
         # Create the change request
         echo "Creating standard change request..."
-        RESPONSE=$(curl -sS \
-          -u "$USERNAME:$PASSWORD" \
-          -X POST \
+        
+        # Calculate dates (tomorrow and day after)
+        export TZ=UTC
+        START_DATE=$(date -v+1d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow" +"%Y-%m-%d 00:00:00")
+        END_DATE=$(date -v+2d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow + 1 day" +"%Y-%m-%d 00:00:00")
+        
+        # Create and send change request
+        RESPONSE=$(curl -sS -X POST \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json" \
-          -d '{
-            "u_service_offering": "Platform Engineering",
-            "start_date": "2025-10-12 00:00:00",
-            "end_date": "2025-10-13 00:00:00",
-            "work_start": "2025-10-15 00:00:00",
-            "work_end": "2025-10-19 00:00:00",
-            "risk": "1",
-            "requested_by": "AAQG",
-            "impact": "2",
-            "urgency": "3",
-            "implementation_plan": "Test implementation plan for the change",
-            "risk_impact_analysis": "Test risk impact analysis for the change",
-            "backout_plan": "Test backout plan in case of failure",
-            "test_plan": "Test plan for the change",
-            "cmdb_ci": "123456789asdfghjkl",
-            "u_sarbox": "yes",
-            "u_criticality": "other_regulatory",
-            "parent": "INC4215160asdfghjkl",
-            "u_release": "1dff7bc73b8e96d4cbad6d6eb5e45a80",
-            "u_service_request": "RITM0781791asdfghjkl",
-            "u_integration_task": "INTG0634241asdfghjkl",
-            "u_change_manager": "AAQG",
-            "assigned_to": "AAQG",
-            "description": "'"$DESCRIPTION"'"
-          }' \
-          "https://$INSTANCE/api/nnash/v1/change_request/standard/create")
-        
+          -d @- "$INSTANCE/api/now/table/change_request" <<EOF
+        {
+          "u_service_offering": "SO-6712 BMS FMS CoE",
+          "start_date": "2025-10-12 00:00:00",
+          "end_date": "2025-10-13 00:00:00",
+          "work_start": "2025-10-15 00:00:00",
+          "work_end": "2025-10-19 00:00:00",
+          "risk": "1",
+          "requested_by": "WKRZ",
+          "impact": "2",
+          "urgency": "3",
+          "implementation_plan": "Implementation plan",
+          "risk_impact_analysis": "Impact analysis",
+          "backout_plan": "Backout plan",
+          "test_plan": "Lorem ipsum dolor sit amet",
+          "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
+          "u_sarbox": "yes",
+          "u_criticality": "other_regulatory",
+          "parent": "INC4215160",
+          "u_release": "1dff7bc73b8e96d4cbad6d6eb5e45a80",
+          "u_service_request": "RITM0781791",
+          "u_integration_task": "INTG0634241",
+          "u_change_manager": "WKRZ",
+          "assigned_to": "WKRZ"
+        }
+        EOF
+        )
+
         # Check for errors
         if ! echo "$RESPONSE" | jq -e '.result' > /dev/null; then
           echo "Error creating change:"
