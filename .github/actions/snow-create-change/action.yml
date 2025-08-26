@@ -131,7 +131,6 @@ runs:
           "requested_by": "WKRZ",
           "impact": "2",
           "urgency": "3",
-          "implementation_plan": "Implementation plan",
           "risk_impact_analysis": "Impact analysis",
           "backout_plan": "Backout plan",
           "test_plan": "Lorem ipsum dolor sit amet",
