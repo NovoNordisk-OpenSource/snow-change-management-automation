@@ -32,6 +32,7 @@ runs:
         PASSWORD="${{ inputs.password }}"
         CLIENT_ID="${{ inputs.client_id }}"
         CLIENT_SECRET="${{ inputs.client_secret }}"
+        TEMPLATE_ID="${{ inputs.template_id }}"
         
         # Show values with first/last characters of sensitive values
         echo "\nValues being used:"
@@ -98,13 +99,13 @@ runs:
         export TZ=UTC
         START_DATE=$(date -v+1d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow" +"%Y-%m-%d 00:00:00")
         END_DATE=$(date -v+2d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow + 1 day" +"%Y-%m-%d 00:00:00")
-        
+        echo $TEMPLATE_ID 
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json" \
-          -d @- "$INSTANCE/api/nnash/v1/change_request/standard/create/" <<EOF
+          -d @- "$INSTANCE/api/nnash/v1/change_request/standard/create/$TEMPLATE_ID" <<EOF
         {
           "u_service_offering": "SO-6712 BMS FMS CoE",
           "start_date": "2025-10-12 00:00:00",
