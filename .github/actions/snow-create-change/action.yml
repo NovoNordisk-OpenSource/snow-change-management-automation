@@ -101,7 +101,9 @@ runs:
         export TZ=UTC
         START_DATE=$(date -v+1d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow" +"%Y-%m-%d 00:00:00")
         END_DATE=$(date -v+2d +"%Y-%m-%d 00:00:00" 2>/dev/null || date -d "tomorrow + 1 day" +"%Y-%m-%d 00:00:00")
+        echo AAA
         echo $TEMPLATE_ID 
+        echo BBBB
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
           -H "Authorization: Bearer $ACCESS_TOKEN" \
