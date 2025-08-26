@@ -104,7 +104,7 @@ runs:
           -H "Authorization: Bearer $ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json" \
-          -d @- "$INSTANCE/api/now/table/change_request" <<EOF
+          -d @- "$INSTANCE/api/nnash/v1/change_request/standard/create/" <<EOF
         {
           "u_service_offering": "SO-6712 BMS FMS CoE",
           "start_date": "2025-10-12 00:00:00",
