@@ -1,0 +1,52 @@
+name: Example Create Standard Change
+
+on:
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Change description'
+        required: true
+        default: 'Automated standard change created from GitHub Actions'
+
+jobs:
+  create-standard-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create ServiceNow Standard Change
+        id: create_change
+        uses: ./.github/actions/snow-create-change
+        with:
+          instance: ${{ vars.SNOW_INSTANCE }}
+          username: ${{ secrets.SNOW_USERNAME }}
+          password: ${{ secrets.SNOW_PASSWORD }}
+          template_id: 'standard-template-123'  # Replace with your template ID
+          service_offering: 'SO-6712 BMS FMS CoE'
+          start_date: '2025-10-12 00:00:00'
+          end_date: '2025-10-13 00:00:00'
+          work_start: '2025-10-15 00:00:00'
+          work_end: '2025-10-19 00:00:00'
+          requested_by: 'WKRZ'
+          assigned_to: 'WKRZ'
+          change_manager: 'WKRZ'
+          cmdb_ci: '4aa41e6f1be0f4502f98dce0b24bcbbd'  # Replace with actual CMDB CI
+          parent: 'INC4215160'  # Optional
+          release: '1dff7bc73b8e96d4cbad6d6eb5e45a80'  # Optional
+          service_request: 'RITM0781791'  # Optional
+          integration_task: 'INTG0634241'  # Optional
+          impact: '2'  # Medium
+          urgency: '3'  # Low
+          risk: '1'    # High
+          sarbox: 'yes'
+          criticality: 'other_regulatory'
+          implementation_plan: 'Automated implementation plan for the change'
+          risk_impact_analysis: 'Risk impact analysis for the change'
+          backout_plan: 'Backout plan in case of failure'
+          test_plan: 'Test plan for the change'
+    
+      - name: Display Change Details
+        run: |
+          echo "Change Number: ${{ steps.create_change.outputs.change_number }}"
+          echo "Change Link: ${{ steps.create_change.outputs.link }}"

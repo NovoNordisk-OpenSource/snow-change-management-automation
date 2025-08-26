@@ -1,0 +1,34 @@
+name: Example Create ServiceNow Change
+
+on:
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Change description'
+        required: true
+        default: 'Automated change created from GitHub Actions'
+
+jobs:
+  create-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create ServiceNow Change
+        id: create_change
+        uses: ./.github/actions/snow-create-change
+        with:
+          instance: ${{ vars.SNOW_INSTANCE }}
+          username: ${{ secrets.SNOW_USERNAME }}
+          password: ${{ secrets.SNOW_PASSWORD }}
+          short_description: 'Automated Change from GitHub Actions'
+          description: ${{ github.event.inputs.description }}
+          impact: '3'
+          urgency: '3'
+          assignment_group: 'IT Operations'
+    
+      - name: Display Change Details
+        run: |
+          echo "Change Number: ${{ steps.create_change.outputs.change_number }}"
+          echo "Change Link: ${{ steps.create_change.outputs.link }}"
