@@ -130,15 +130,6 @@ runs:
           "requested_by": "WKRZ",
           "impact": "2",
           "urgency": "3",
-          "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
-          "u_sarbox": "yes",
-          "u_criticality": "other_regulatory",
-          "parent": "INC4215160",
-          "u_release": "1dff7bc73b8e96d4cbad6d6eb5e45a80",
-          "u_service_request": "RITM0781791",
-          "u_integration_task": "INTG0634241",
-          "u_change_manager": "WKRZ",
-          "assigned_to": "WKRZ",
         }
         EOF
         )
