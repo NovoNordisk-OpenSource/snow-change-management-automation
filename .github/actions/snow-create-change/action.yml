@@ -111,9 +111,7 @@ runs:
           echo "❌ Error: TEMPLATE_ID is empty"
           exit 1
         fi
-        echo AAA
         echo $INSTANCE
-        echo BBB
         echo "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/0bfe466b2b662250f026f6bcf291bfbe"
         # Create and send change request
         RESPONSE=$(curl -sS -X POST \
@@ -132,16 +130,36 @@ runs:
         EOF
         )
 
-        # Check for errors
-        if ! echo "$RESPONSE" | jq -e '.result' > /dev/null; then
+        # Debug: Show the raw response structure
+        echo "Raw response from change creation:"
+        echo "$RESPONSE" | jq .
+        
+        # Check for errors and determine response structure
+        if echo "$RESPONSE" | jq -e '.error' > /dev/null; then
           echo "Error creating change:"
           echo "$RESPONSE" | jq .
           exit 1
         fi
         
-        # Extract and output results
-        CHANGE_NUMBER=$(echo "$RESPONSE" | jq -r '.result.number')
-        SYS_ID=$(echo "$RESPONSE" | jq -r '.result.sys_id')
+        # Extract results - handle different response structures
+        if echo "$RESPONSE" | jq -e '.result | type' > /dev/null; then
+          RESULT_TYPE=$(echo "$RESPONSE" | jq -r '.result | type')
+          echo "Result type: $RESULT_TYPE"
+          
+          if [ "$RESULT_TYPE" = "array" ]; then
+            # If result is an array, take the first element
+            CHANGE_NUMBER=$(echo "$RESPONSE" | jq -r '.result[0].number // .result[0].sys_id // empty')
+            SYS_ID=$(echo "$RESPONSE" | jq -r '.result[0].sys_id // empty')
+          else
+            # If result is an object, use direct property access
+            CHANGE_NUMBER=$(echo "$RESPONSE" | jq -r '.result.number // .result.sys_id // empty')
+            SYS_ID=$(echo "$RESPONSE" | jq -r '.result.sys_id // empty')
+          fi
+        else
+          # Fallback: try direct access to response properties
+          CHANGE_NUMBER=$(echo "$RESPONSE" | jq -r '.number // .sys_id // empty')
+          SYS_ID=$(echo "$RESPONSE" | jq -r '.sys_id // empty')
+        fi
         LINK="https://$INSTANCE/nav_to.do?uri=change_request.do?sys_id=$SYS_ID"
         
         echo "✅ Change $CHANGE_NUMBER created successfully!"
