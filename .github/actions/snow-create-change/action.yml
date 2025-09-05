@@ -122,24 +122,12 @@ runs:
           -H "Accept: application/json" \
           -d @- "https://novonordisktraining.service-now.com/api/nnash/v1/change_request/standard/create/0bfe466b2b662250f026f6bcf291bfbe" <<EOF
         {
-          "u_service_offering": "CoE",
           "start_date": "2025-10-12 00:00:00",
           "end_date": "2025-10-13 00:00:00",
-          "work_start": "2025-10-15 00:00:00",
-          "work_end": "2025-10-19 00:00:00",
-          "risk": "1",
-          "requested_by": "WKRZ",
-          "impact": "2",
-          "urgency": "3",
-          "cmdb_ci": "4aa41e6f1be0f4502f98dce0b24bcbbd",
-          "u_sarbox": "yes",
-          "u_criticality": "other_regulatory",
-          "parent": "INC4215160",
-          "u_release": "1dff7bc73b8e96d4cbad6d6eb5e45a80",
-          "u_service_request": "RITM0781791",
-          "u_integration_task": "INTG0634241",
-          "u_change_manager": "WKRZ",
-          "assigned_to": "WKRZ"
+          "u_service_offering": "TSO-Log Collection (GID)",
+          "requested_by": "AAQG",
+          "impact": "4",
+          "urgency": "4"
         }
         EOF
         )
